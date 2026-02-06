@@ -1,17 +1,65 @@
 # Iso-Net Indicator (Cinnamon applet)
 
-A small panel applet for Linux Mint Cinnamon that shows whether you're on **Iso-Net** in the expected isolated state:
+A small panel applet for Linux Mint Cinnamon that shows whether your special **Iso-Net** connection is:
 
-- **ipv4.gateway:** `--` (no gateway)
-- **ipv4.method:** `manual` (no DHCP)
+- **Offline** (no active ethernet/wifi)
+- **Isolated** on Iso-Net (local network only, no gateway / no internet)
+- **Online** (normal internet connectivity)
 
-## Visual indicator
+It listens to system network changes (via `Gio.NetworkMonitor`) and then uses `nmcli` to inspect connections, so it only runs when connectivity actually changes.
 
-- **Offline** (`network-wireless-offline-symbolic`): No network connected.
-- **Shield** (`security-high-symbolic`): Iso-Net is active and isolated — no internet (no gateway, manual).
-- **Connected** (`network-wireless-connected-symbolic`): Connected to internet — Iso-Net not active or has a gateway.
+---
 
-The applet checks every 5 seconds. Hover for a tooltip with the exact status.
+## How it decides the state
+
+1. **Check overall connectivity**
+   - If `nmcli -t networking connectivity` reports `none`, the applet shows **Offline**.
+
+2. **Look at active connections**
+   - `nmcli -t -f NAME,TYPE con show --active`
+   - Only **ethernet** / **wifi** types count (no bridges, VPN, docker, etc.).
+   - If there are no active ethernet/wifi connections → **Offline**.
+
+3. **Check the Iso-Net profile**
+   - The profile name defaults to `Iso-Net` (see below to change it).
+   - If Iso-Net is **not** in the list of active connections:
+     - Show **Online** with a tooltip listing the active connection names.
+   - If Iso-Net **is** active:
+     - `nmcli connection show "Iso-Net"` is parsed for:
+       - `ipv4.gateway` (must be empty / `--`)
+       - `ipv4.method` (must be `manual`)
+     - If **no gateway** and **manual** → **Isolated** (local only, no default route).
+     - Otherwise → **Online** (Iso-Net has a gateway or unexpected method).
+
+Tooltips always show the exact reason (e.g. “Iso-Net: isolated (no internet, no gateway)” or “Connected: HomeWifi”).
+
+---
+
+## Setting up the Iso-Net connection
+
+1. **Create a connection profile**
+   - In Network Manager (or the Mint network settings), create a wired or Wi‑Fi profile named **Iso-Net**.
+   - Or choose any name you like and update `CONNECTION_NAME` in `applet.js`.
+
+2. **IPv4 settings**
+   - Method: **Manual**
+   - Set a static IP address on your isolated network.
+   - Leave **Gateway** empty so there is **no default route / no internet**.
+
+3. **Test it manually**
+
+   ```bash
+   nmcli connection show Iso-Net
+   ```
+
+   You should see:
+
+   - `ipv4.gateway: --`
+   - `ipv4.method: manual`
+
+When this profile is active with those settings, the applet will show the **isolated** icon instead of normal internet.
+
+---
 
 ## Installation
 
@@ -21,29 +69,21 @@ The applet checks every 5 seconds. Hover for a tooltip with the exact status.
    cp -r iso-net-indicator@local ~/.local/share/cinnamon/applets/
    ```
 
-2. Reload Cinnamon (Alt+F2 → type `r` → Enter) or log out and back in.
+2. Reload Cinnamon (for example: `Ctrl` + `Alt` + `Escape`, or `Alt` + `F2` → `r` → Enter).
 
 3. Add the applet to the panel:
-   - Right-click the panel → **Applets** → find **Iso-Net Indicator** → **Add to panel**.
-   - Place it next to the network icon.
+   - Right-click the panel → **Applets**
+   - Find **Iso-Net Indicator**
+   - Click **Add to panel**
+
+---
 
 ## Changing the connection name
 
-The applet checks the connection named **Iso-Net** by default. To use another name, edit `applet.js` and change the line:
+In `applet.js`:
 
 ```javascript
 const CONNECTION_NAME = 'Iso-Net';
 ```
 
-Then remove and re-add the applet (or restart Cinnamon).
-
-## Check manually (without the applet)
-
-```bash
-nmcli connection show Iso-Net
-```
-
-Look for:
-
-- `ipv4.gateway: --` (empty = no gateway)
-- `ipv4.method: manual` (no DHCP)
+Change `'Iso-Net'` to match your profile’s name, then reload Cinnamon or remove/re-add the applet.
