@@ -1,0 +1,7 @@
+{
+  "uuid": "iso-net-indicator@local",
+  "name": "Iso-Net Indicator",
+  "description": "Shows shield when on Iso-Net (no internet), globe when connected to internet.",
+  "icon": "security-high-symbolic",
+  "max-instances": -1
+}
