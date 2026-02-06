@@ -45,6 +45,9 @@ Tooltips always show the exact reason (e.g. “Iso-Net: isolated (no internet, n
    - Method: **Manual**
    - Set a static IP address on your isolated network.
    - Leave **Gateway** empty so there is **no default route / no internet**.
+  
+<img width="789" height="551" alt="image" src="https://github.com/user-attachments/assets/716f6bf8-7f4d-4908-b4b4-e74680e659a4" />
+
 
 3. **Test it manually**
 
