@@ -2,9 +2,12 @@
 
 A small panel applet for Linux Mint Cinnamon that shows whether your special **Iso-Net** connection is:
 
-- **Offline** (no active ethernet/wifi)
-- **Isolated** on Iso-Net (local network only, no gateway / no internet)
-- **Online** (normal internet connectivity)
+- **Offline** (no active ethernet/wifi) <img width="64" height="28" alt="image" src="https://github.com/user-attachments/assets/48e17acd-4854-43d7-9802-baf3b3c16c54" />
+
+- **Isolated** on Iso-Net (local network only, no gateway / no internet) <img width="64" height="44" alt="image" src="https://github.com/user-attachments/assets/2c99cd2b-a1c6-4319-9ece-8106e109a6d7" />
+
+- **Online** (normal internet connectivity) <img width="66" height="48" alt="image" src="https://github.com/user-attachments/assets/0b916aa6-54dc-4874-a1b8-c7181e430528" />
+
 
 It listens to system network changes (via `Gio.NetworkMonitor`) and then uses `nmcli` to inspect connections, so it only runs when connectivity actually changes.
 
